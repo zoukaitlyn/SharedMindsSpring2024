@@ -7,5 +7,7 @@
 			"path": "../../Downloads/SharedMindsS24-master"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "SharedMindsSpring2024"
+	}
 }

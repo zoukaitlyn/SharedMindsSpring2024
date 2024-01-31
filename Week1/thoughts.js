@@ -26,7 +26,7 @@ function setup() {
 }
 
 function draw() {
-    console.log("length", allThoughts.length)
+    // console.log("length", allThoughts.length)
     // thoughtInput.addEventListener("input", function () {
         // fill(randomR, randomG, randomB)
         // textSize(randomSize)
@@ -35,7 +35,7 @@ function draw() {
     // });
 
     submitButton.addEventListener("click", function () {
-        console.log(thoughtInput.value)
+        // console.log(thoughtInput.value)
         let k = new Thought(randomX, randomY, randomSize, randomR, randomG, randomB, thoughtInput.value)
         allThoughts.push(k)
         thoughtInput.value = ""
