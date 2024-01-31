@@ -9,7 +9,7 @@ let textSpeed;
 let allThoughts = []
 
 function setup() {
-    var canvas = createCanvas(1500, 700);
+    var canvas = createCanvas(1500, 650);
     canvas.parent('#canvas-div');
     fill(0)
 
