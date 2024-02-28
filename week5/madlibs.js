@@ -151,8 +151,6 @@ function drawText(x, y, text, color, font, fontSize) {
             ctx.fillText(object.userName + ": " + object.text, object.position.x, object.position.y);
 
         }
-    
-
     }
 }
 
@@ -249,17 +247,39 @@ function addNewThingToFirebase(folder, data) {
     return newKey; //useful for later updating
 }
 
+function redrawAll(x, y, text, color, font, fontSize) {
+    const ctx = canvas.getContext('2d');
+    ctx.font = fontSize + 'px ' + font;
+    ctx.fillStyle = color;
+    for(let key in objects){
+        const object = objects[key]
+        if (object.type === 'text') {
+            ctx.fillText(object.userName + ": " + object.text, object.position.x, object.position.y);
+
+        }
+    }
+}
+
 function subscribeToData(folder) {
     //get callbacks when there are changes either by you locally or others remotely
     const commentsRef = ref(db, appName + '/' + folder + '/');
     onChildAdded(commentsRef, (data) => {
-        drawText(data.val().position.x, data.val().position.y, data.val().text, data.val().color, data.val().font, data.val().fontSize);
+        // drawText(data.val().position.x, data.val().position.y, data.val().text, data.val().color, data.val().font, data.val().fontSize);
+        let localData = data.val();
+        localData.key = data.key;
+        objects[data.key] = localData;
+        redrawAll();
     });
     onChildChanged(commentsRef, (data) => {
-        reactToFirebase("changed", data.val(), data.key)
+        // reactToFirebase("changed", data.val(), data.key)
+        objects[data.key] = data.val();
+        redrawAll();
     });
     onChildRemoved(commentsRef, (data) => {
-        reactToFirebase("removed", data.val(), data.key)
+        // reactToFirebase("removed", data.val(), data.key)
+        delete objects[data.key];
+        isEditing = false;
+        redrawAll();
     });
 }
 
