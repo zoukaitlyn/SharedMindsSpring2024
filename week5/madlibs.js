@@ -3,6 +3,9 @@ import { getDatabase, ref, onValue, update, set, push, onChildAdded, onChildChan
 import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, createUserWithEmailAndPassword, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js"
 
 let isInteracting = false;
+let isEditing = false;
+let editingObject = null;
+let objects = {};
 
 // Get the input box and the canvas element
 const canvas = document.createElement('canvas');
