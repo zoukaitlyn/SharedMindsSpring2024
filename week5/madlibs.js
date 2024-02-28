@@ -145,7 +145,15 @@ function drawText(x, y, text, color, font, fontSize) {
     const ctx = canvas.getContext('2d');
     ctx.font = fontSize + 'px ' + font;
     ctx.fillStyle = color;
-    ctx.fillText(text, x, y);
+    for(let key in objects){
+        for (let key in objects) {
+            if (object.type === 'text') {
+                ctx.fillText(object.userName + ": " + object.text, object.position.x, object.position.y);
+
+            }
+        }
+
+    }
 }
 
 // Add event listener to the color select menu
