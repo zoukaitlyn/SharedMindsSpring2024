@@ -146,12 +146,12 @@ function drawText(x, y, text, color, font, fontSize) {
     ctx.font = fontSize + 'px ' + font;
     ctx.fillStyle = color;
     for(let key in objects){
-        for (let key in objects) {
-            if (object.type === 'text') {
-                ctx.fillText(object.userName + ": " + object.text, object.position.x, object.position.y);
+        const object = objects[key]
+        if (object.type === 'text') {
+            ctx.fillText(object.userName + ": " + object.text, object.position.x, object.position.y);
 
-            }
         }
+    
 
     }
 }
