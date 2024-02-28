@@ -129,7 +129,7 @@ inputBox.addEventListener('keydown', function (event) {
         }
         let userName = user.displayName;
         if (!userName) userName = user.email.split("@")[0];
-        const data = { type: 'text', position: { x: x, y: y }, text: inputValue, color: colorValue, font: fontValue, fontSize: sizeValue};
+        const data = { type: 'text', position: { x: x, y: y }, text: inputValue, color: colorValue, font: fontValue, fontSize: sizeValue, userName: userName};
         if (isEditing) {
             console.log("update editing", editingObject.key, data);
             updateJSONFieldInFirebase('texts', editingObject.key, data);
