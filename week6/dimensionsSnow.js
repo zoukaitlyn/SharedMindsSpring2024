@@ -1,0 +1,295 @@
+import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.1/three.module.min.js';
+import { OrbitControls } from 'https://unpkg.com/three@0.126.1/examples/jsm/controls/OrbitControls.js';
+
+let camera3D, scene, renderer, cube;
+let controls;
+let light;
+
+//snow
+let particles; // snowflakes
+let positions = [], velocities = []; // snowflake positions and velocities (x,y,z)
+
+const numSnowflakes = 10000; // number of snowflakes
+
+const maxRange = 1000, minRange = maxRange/2; // snowflakes placed -500 to 500 on x and z axes
+const minHeight = 150; // snowflakes placed 150 to 500 on y axis
+
+// buffer geometry stores data as arrays for each attribute
+const geometry = new THREE.BufferGeometry(); // positions and velocites as attributes
+const textureLoader = new THREE.TextureLoader(); // load snowflake image
+
+
+const replicateProxy = "https://replicate-api-proxy.glitch.me"
+let images = [];
+let in_front_of_you;
+let distanceFromCamera = -800;
+
+init3D();
+
+var input_image_field = document.createElement("input");
+input_image_field.type = "text";
+input_image_field.id = "input_image_prompt";
+input_image_field.value = "MadLib Story";
+input_image_field.size = 100;
+document.getElementById("webInterfaceContainer").append(input_image_field);
+input_image_field.addEventListener("keyup", function (event) {
+    if (event.key === "Enter") {
+        askForPicture(input_image_field);
+    }
+});
+
+
+function init3D() {
+    scene = new THREE.Scene();
+    camera3D = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById("ThreeJSContainer").append(renderer.domElement);
+
+    // call snowflake function, make geometry + material and add to screen
+    addSnowflakes();
+
+    //just a place holder the follows the camera and marks location to drop incoming  pictures
+    //tiny little dot (could be invisible) 
+    var geometryFront = new THREE.BoxGeometry(1, 1, 1);
+    var materialFront = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    in_front_of_you = new THREE.Mesh(geometryFront, materialFront);
+    in_front_of_you.position.set(0, 0, distanceFromCamera); //set it in front of the camera
+    camera3D.add(in_front_of_you); // then add in front of the camera (not scene) so it follow it
+
+    let bgGeometry = new THREE.SphereGeometry(950, 60, 40);
+    // let bgGeometery = new THREE.CylinderGeometry(725, 725, 1000, 10, 10, true)
+    bgGeometry.scale(-1, 1, 1);
+    // has to be power of 2 like (4096 x 2048) or(8192x4096).  i think it goes upside down because texture is not right size
+    let panotexture = new THREE.TextureLoader().load("./snowpanorama.jpeg");
+    // var material = new THREE.MeshBasicMaterial({ map: panotexture, transparent: true,   alphaTest: 0.02,opacity: 0.3});
+    let backMaterial = new THREE.MeshBasicMaterial({ map: panotexture });
+    let back = new THREE.Mesh(bgGeometry, backMaterial);
+    scene.add(back);
+
+    moveCameraWithMouse();
+
+    camera3D.position.z = 5;
+    animate();
+}
+
+function placeImage(img) {
+    var texture = new THREE.Texture(img);
+    console.log(img, texture);
+    var material = new THREE.MeshBasicMaterial({ map: texture, transparent: false });
+    var geo = new THREE.PlaneGeometry(512, 512);
+    var mesh = new THREE.Mesh(geo, material);
+
+    const posInWorld = new THREE.Vector3();
+    //remember we attached a tiny to the  front of the camera in init, now we are asking for its position
+
+    in_front_of_you.position.set(0, 0, distanceFromCamera);  //base the the z position on camera field of view
+    in_front_of_you.getWorldPosition(posInWorld);
+    mesh.position.x = posInWorld.x;
+    mesh.position.y = posInWorld.y;
+    mesh.position.z = posInWorld.z;
+    console.log(posInWorld);
+    mesh.lookAt(0, 0, 0);
+    //mesh.scale.set(10,10, 10);
+    scene.add(mesh);
+    images.push({ "object": mesh, "texture": texture });
+}
+
+
+async function askForPicture(inputField) {
+    prompt = inputField.value;
+    inputField.value = "Waiting for reply for: " + prompt;
+
+
+    let data = {
+        "version": "c221b2b8ef527988fb59bf24a8b97c4561f1c671f73bd389f866bfb27c061316",
+        input: {
+            "prompt": prompt,
+            "width": 1024,
+            "height": 512,
+        },
+    };
+    console.log("Asking for Picture Info From Replicate via Proxy", data);
+    let options = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    };
+    const url = replicateProxy + "/create_n_get/"
+    console.log("url", url, "options", options);
+    const picture_info = await fetch(url, options);
+    //console.log("picture_response", picture_info);
+    const proxy_said = await picture_info.json();
+
+    if (proxy_said.output.length == 0) {
+        alert("Something went wrong, try it again");
+    } else {
+        inputField.value = prompt;
+        //Loading of the home test image - img1
+        var incomingImage = new Image();
+        incomingImage.crossOrigin = "anonymous";
+        incomingImage.onload = function () {
+            placeImage(incomingImage);
+        };
+        incomingImage.src = proxy_said.output[0];
+    }
+}
+
+function animate() {
+    updateParticles();
+
+    requestAnimationFrame(animate);
+    for (var i = 0; i < images.length; i++) {
+        images[i].texture.needsUpdate = true;
+    }
+    renderer.render(scene, camera3D);
+}
+
+/////MOUSE STUFF
+
+var onMouseDownMouseX = 0, onMouseDownMouseY = 0;
+var onPointerDownPointerX = 0, onPointerDownPointerY = 0;
+var lon = -90, onMouseDownLon = 0;
+var lat = 0, onMouseDownLat = 0;
+var isUserInteracting = false;
+
+
+function moveCameraWithMouse() {
+    document.addEventListener('keydown', onDocumentKeyDown, false);
+    document.addEventListener('mousedown', onDocumentMouseDown, false);
+    document.addEventListener('mousemove', onDocumentMouseMove, false);
+    document.addEventListener('mouseup', onDocumentMouseUp, false);
+    document.addEventListener('wheel', onDocumentMouseWheel, false);
+    window.addEventListener('resize', onWindowResize, false);
+    camera3D.target = new THREE.Vector3(0, 0, 0);
+}
+
+function onDocumentKeyDown(event) {
+    //if (event.key == " ") {
+    //in case you want to track key presses
+    //}
+}
+
+function onDocumentMouseDown(event) {
+    onPointerDownPointerX = event.clientX;
+    onPointerDownPointerY = event.clientY;
+    onPointerDownLon = lon;
+    onPointerDownLat = lat;
+    isUserInteracting = true;
+}
+
+function onDocumentMouseMove(event) {
+    if (isUserInteracting) {
+        lon = (onPointerDownPointerX - event.clientX) * 0.1 + onPointerDownLon;
+        lat = (event.clientY - onPointerDownPointerY) * 0.1 + onPointerDownLat;
+        computeCameraOrientation();
+    }
+}
+
+function onDocumentMouseUp(event) {
+    isUserInteracting = false;
+}
+
+function onDocumentMouseWheel(event) {
+    camera3D.fov += event.deltaY * 0.05;
+    camera3D.updateProjectionMatrix();
+}
+
+function computeCameraOrientation() {
+    lat = Math.max(- 30, Math.min(30, lat));  //restrict movement
+    let phi = THREE.Math.degToRad(90 - lat);  //restrict movement
+    let theta = THREE.Math.degToRad(lon);
+    camera3D.target.x = 100 * Math.sin(phi) * Math.cos(theta);
+    camera3D.target.y = 100 * Math.cos(phi);
+    camera3D.target.z = 100 * Math.sin(phi) * Math.sin(theta);
+    camera3D.lookAt(camera3D.target);
+}
+
+
+function onWindowResize() {
+    camera3D.aspect = window.innerWidth / window.innerHeight;
+    camera3D.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    console.log('Resized');
+}
+
+function generateMadLib() {
+    var adj1 = document.getElementById("adj1").value;
+    var place = document.getElementById("place").value;
+    var adj2 = document.getElementById("adj2").value;
+    var thing1 = document.getElementById("thing1").value;
+    var number = document.getElementById("number").value;
+    var relative = document.getElementById("relative").value;
+    var thing2 = document.getElementById("thing2").value;
+    var part = document.getElementById("part").value;
+    var celebrity = document.getElementById("celebrity").value;
+    var thing3 = document.getElementById("thing3").value;
+
+    var madLibStory = "The weather recently dipped down to " + number + " degrees, which is really cold for me. I was already bundled up, so I had to break out the thermals for my " + part + " and the " + adj1 + " sweater. " + relative + " knit the sweater for me and it’s horrible. It’s got a pattern of " + thing3 + " across the bottom with a large, " + adj2 + " " + thing1 + " in the center. I hate to wear it, but it’s woven with little bits of " + thing2 + " interlaced with the wools, so it’s super warm. But now I can’t go out anywhere because I look like " + celebrity + " if they were stranded in " + place + ".";
+
+    document.getElementById("madLibStory").innerText = madLibStory;
+    document.getElementById("input_image_prompt").value = madLibStory;
+    input_image_field.value = madLibStory
+
+}
+
+function addSnowflakes(){
+    // loops through all snowflakes
+    for(let i=0; i<numSnowflakes; i++){
+        positions.push( // create a position for each snowflake
+            Math.random() * maxRange - minRange, // x -500 to 500
+            Math.random() * minRange - minHeight, // y 250 to 750
+            Math.random() * minRange - minRange // z -500 to 500
+        );
+        velocities.push( // create a velocity for each snowflake, sideways drift
+            (Math.random() * 6 - 3) * 0.1, // x 0.3 to -0.3
+            (Math.random() * 5 - 0.12) * 0.18, // y 0.02 to 0.92
+            (Math.random() * 6 - 3) * 0.1 // -0.3 to 0.3
+        );
+    }
+
+    // add to geometry
+    // each attribute has an array of values
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geometry.setAttribute('velocity', new THREE.Float32BufferAttribute(velocities, 3));
+
+    // create snowflake material
+    const snowflakeMaterial = new THREE.PointsMaterial({
+        size: 4,
+        map: textureLoader.load("snowflake.png"),
+        blending: THREE.AdditiveBlending, // add rgb values
+        depthTest: false, // determines if one object is in front of another
+        transparent: true, // enable opacity changes
+        opacity: 0.7
+    });
+    
+    // create snowflake particle, add to array
+    // snowflakes are points located in 3d world
+    particles = new THREE.Points(geometry, snowflakeMaterial);
+    scene.add(particles);
+}
+
+function updateParticles(){
+    // take velocity values and subtract from position values for each snowflake
+    // every snowflake has 3 position values
+    for(let i=0; i < numSnowflakes*3; i += 3){
+        particles.geometry.attributes.position.array[i] -= particles.geometry.attributes.velocity.array[i];
+        particles.geometry.attributes.position.array[i+1] -= particles.geometry.attributes.velocity.array[i+1];
+        particles.geometry.attributes.position.array[i+2] -= particles.geometry.attributes.velocity.array[i+2];
+
+        // is the snowflake is below the ground?
+        // give the snowflake a new position(same in add snowflake)
+        if(particles.geometry.attributes.position.array[i+1] < -200){
+            particles.geometry.attributes.position.array[i] = Math.random() * maxRange - minRange;
+            particles.geometry.attributes.position.array[i+1] = Math.random() * minRange - minHeight;
+            particles.geometry.attributes.position.array[i+2] = Math.random() * minRange - minRange;
+        }
+    }
+    // tell computer to update new position in position array
+    particles.geometry.attributes.position.needsUpdate = true;
+}
+
+document.getElementById("generateMadLibButton").addEventListener("click", generateMadLib);

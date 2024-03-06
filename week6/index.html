@@ -1,0 +1,90 @@
+<html>
+
+<head>
+    <title>Madlib to Image</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #madLibsForm {
+            margin-bottom: 20px;
+            width: 25%;
+        }
+
+        input, button {
+            margin-bottom: 10px;
+        }
+
+        .madLibsContainer{
+            /* display: flex; */
+            position: relative;
+            z-index: 100;
+        }
+        
+        #madLibStory{
+            width: 35%;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <h1>Mad Libs Game</h1>
+
+    <div class="madLibsContainer">
+        <div id="madLibsForm">
+            <label for="adj1">Adjective:</label>
+            <input type="text" id="adj1"><br>
+            
+            <label for="place">Place:</label>
+            <input type="text" id="place"><br>
+            
+            <label for="adj2">Adjective:</label>
+            <input type="text" id="adj2"><br>
+    
+            <label for="thing1">Thing(singular):</label>
+            <input type="text" id="thing1"><br>
+    
+            <label for="number">Number:</label>
+            <input type="text" id="number"><br>
+            
+            <label for="relative">A relative:</label>
+            <input type="text" id="relative"><br>
+    
+            <label for="thing2">Thing(plural):</label>
+            <input type="text" id="thing2"><br>
+    
+            <label for="part">Body part:</label>
+            <input type="text" id="part"><br>
+    
+            <label for="celebrity">Celebrity:</label>
+            <input type="text" id="celebrity"><br>
+    
+            <label for="thing3">Thing(plural):</label>
+            <input type="text" id="thing3"><br>
+            
+            <!-- <button onclick="generateMadLib()">Generate Mad Lib</button> -->
+            <button id="generateMadLibButton">Generate Mad Lib</button>
+
+        </div>
+        
+        <div id="madLibStory"></div>
+    </div>
+
+    <div id="ThreeJSContainer"
+         style="position: absolute; top: 0px; left: 0px; z-index: 1; width: 100%; height: 100%; pointer-events: none;">
+    </div>
+    <div id="webInterfaceContainer"
+         style="position: absolute; top: 20px; z-index: 2; ">
+    </div>
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/102/three.min.js"></script>
+    <script type="module" src="dimensionsSnow.js"></script>
+
+
+</body>
+
+</html>
