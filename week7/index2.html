@@ -1,0 +1,77 @@
+<html>
+
+<head>
+    <title>Madlib to Image</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #madLibsForm {
+            margin-bottom: 20px;
+            width: 25%;
+        }
+
+        input, button {
+            margin-bottom: 10px;
+        }
+
+        .madLibsContainer{
+            /* display: flex; */
+            position: relative;
+            z-index: 100;
+        }
+        
+        #madLibStory{
+            width: 35%;
+        }
+
+    </style>
+
+</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/102/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/p5@1.2.0/lib/p5.js"></script>
+<script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+
+<body>
+    <h1>Weather</h1>
+    <br>
+    <div class="madLibsContainer">
+        <div id="madLibsForm">
+            Describe...
+            <br>
+            <label for="weather">Current weather:</label>
+            <input type="text" id="weather"><br>
+            
+            <label for="location">Current location:</label>
+            <input type="text" id="location"><br>
+            
+            <label for="emotion">Current emotion:</label>
+            <input type="text" id="emotion"><br>
+    
+            <label for="action">Current action(verb):</label>
+            <input type="text" id="action"><br>
+            
+            <button id="generateMadLibButton">Generate Mad Lib</button>
+
+            <!-- It is a sunny day in NYC. As I am cooking, I am in a happy mood. -->
+
+        </div>
+        
+        <div id="madLibStory"></div>
+    </div>
+
+    <div id="ThreeJSContainer"
+         style="position: absolute; top: 0px; left: 0px; z-index: 1; width: 100%; height: 100%; pointer-events: none;">
+    </div>
+    <div id="webInterfaceContainer"
+         style="position: absolute; top: 20px; z-index: 2; ">
+    </div>
+
+    
+    <script type="module" src="textToSound.js"></script>
+
+
+</body>
+
+</html>
