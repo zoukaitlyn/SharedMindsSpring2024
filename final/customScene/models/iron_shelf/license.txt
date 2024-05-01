@@ -1,0 +1,11 @@
+Model Information:
+* title:	Iron Shelf
+* source:	https://sketchfab.com/3d-models/iron-shelf-fd0cd420ffe04ac08174926f6b175d3f
+* author:	Thunder (https://sketchfab.com/thunderpwn)
+
+Model License:
+* license type:	CC-BY-SA-4.0 (http://creativecommons.org/licenses/by-sa/4.0/)
+* requirements:	Author must be credited. Modified versions must have the same license. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Iron Shelf" (https://sketchfab.com/3d-models/iron-shelf-fd0cd420ffe04ac08174926f6b175d3f) by Thunder (https://sketchfab.com/thunderpwn) licensed under CC-BY-SA-4.0 (http://creativecommons.org/licenses/by-sa/4.0/)

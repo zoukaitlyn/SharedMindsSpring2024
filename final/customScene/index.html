@@ -12,20 +12,29 @@
             top: 20px; 
             left: 20px; 
             z-index: 1; 
+            background-color: white;
+            padding: 10px;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
     <div class="menu">
         <select id="shapeSelect">
-            <option value="box">Box</option>
-            <option value="sphere">Sphere</option>
-            <option value="cylinder">Cylinder</option>
+            <option value="box">Download</option>
+            <option value="sphere">Application</option>
+            <option value="cylinder">Document</option>
         </select>
         <input type="color" id="colorPicker" value="#ff0000">
+        <input type="text" id="objectLabel" name="objectLabel">
         <button id="addButton">Add</button>
         <br><br>
         <div>Floor Texture:</div>
+        <select id="floorSelect">
+            <option value="floor1">Carpet 1</option>
+            <option value="floor2">Carpet 2</option>
+            <!-- Add more options as needed -->
+        </select>
         <input type="file" id="floorFileInput" accept="image/*">
         <br><br>
         <div>Background Texture:</div>
